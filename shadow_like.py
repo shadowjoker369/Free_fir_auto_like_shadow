@@ -2,8 +2,11 @@ import os
 import requests
 from flask import Flask, request
 
+# -----------------------------
+# Telegram Bot Configuration
+# -----------------------------
 BOT_TOKEN = "8407881452:AAFm5RKiw54PhIZj7lZ7k-7q7yYSfdN8TLw"
-WEBHOOK_URL = f"https://your-app-name.onrender.com/{BOT_TOKEN}"
+WEBHOOK_URL = f"https://free-fir-auto-like-shadow.onrender.com/{BOT_TOKEN}"
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 
 # API Endpoints
@@ -17,29 +20,31 @@ app = Flask(__name__)
 # -----------------------------
 def send_likes(uid: str) -> str:
     try:
-        # API 1
+        # API 1 Call
         params1 = {"key": "conbo", "uid": uid, "region": "bd"}
         res1 = requests.get(API_1, params=params1, timeout=5).json()
-        status1 = res1.get("status", "No response")
+        status1 = res1.get("status", "❌ No response")
 
-        # API 2
+        # API 2 Call
         params2 = {"uid": uid, "amount_of_likes": 100, "auth": "trial-7d", "region": "bd"}
         res2 = requests.get(API_2, params=params2, timeout=5).json()
-        status2 = res2.get("status", "No response")
+        status2 = res2.get("status", "❌ No response")
 
         return (
-            f"🎮 *FREE FIRE LIKE BOT*\n"
-            f"💳 Credit: SHADOW JOKER\n\n"
-            f"✅ Likes Sent!\n\n"
-            f"*API 1 Status:* {status1}\n"
-            f"*API 2 Status:* {status2}\n\n"
-            f"UID: `{uid}`"
+            "🎮 *FREE FIRE AUTO LIKE BOT*\n"
+            "───────────────────────\n"
+            f"🆔 UID: `{uid}`\n\n"
+            f"⚡ API-1 Response: {status1}\n"
+            f"⚡ API-2 Response: {status2}\n\n"
+            "✅ Likes Request Sent Successfully!\n"
+            "───────────────────────\n"
+            "💳 *Credit:* SHADOW JOKER"
         )
     except Exception as e:
-        return f"⚠ Error sending likes: {e}"
+        return f"⚠ Error: {e}"
 
 # -----------------------------
-# Send Message (With optional buttons or force reply)
+# Send Message with optional buttons or force reply
 # -----------------------------
 def send_message(chat_id, text, buttons=None, force_reply=False):
     payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
@@ -47,8 +52,8 @@ def send_message(chat_id, text, buttons=None, force_reply=False):
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     elif force_reply:
-        payload["reply_markup"] = {"force_reply": True, "input_field_placeholder": "Enter UID here..."}
-    
+        payload["reply_markup"] = {"force_reply": True, "input_field_placeholder": "Enter your UID..."}
+
     requests.post(API_URL + "sendMessage", json=payload)
 
 # -----------------------------
@@ -56,28 +61,28 @@ def send_message(chat_id, text, buttons=None, force_reply=False):
 # -----------------------------
 @app.route("/")
 def home():
-    return "🤖 FREE FIRE LIKE BOT Running!"
+    return "🤖 FREE FIRE AUTO LIKE BOT by SHADOW JOKER is Running!"
 
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     update = request.get_json()
 
-    # Message Handling
+    # Normal message
     if "message" in update:
         message = update["message"]
         chat_id = message["chat"]["id"]
         text = message.get("text", "")
 
-        # Start command
         if text == "/start":
-            buttons = [[{"text": "Send UID", "callback_data": "send_uid"}]]
-            send_message(chat_id,
-                "🎮 *FREE FIRE LIKE BOT*\n"
-                "💳 Credit: SHADOW JOKER\n\n"
-                "👋 Welcome! Click below to send your UID.",
+            buttons = [[{"text": "🚀 Send UID", "callback_data": "send_uid"}]]
+            send_message(
+                chat_id,
+                "🎮 *Welcome to FREE FIRE AUTO LIKE BOT!*\n\n"
+                "👉 Click below to send your UID and get likes instantly.\n\n"
+                "💳 *Credit:* SHADOW JOKER",
                 buttons
             )
-        # Direct /like command
+
         elif text.startswith("/like"):
             args = text.split(" ")
             if len(args) == 2:
@@ -87,26 +92,24 @@ def webhook():
             else:
                 send_message(chat_id, "⚠ Usage: `/like <UID>`")
 
-        # If it's a reply to Force Reply
         elif "reply_to_message" in message:
-            reply_text = message["text"]
-            if reply_text.isdigit() or reply_text:  # Basic UID validation
-                uid = reply_text.strip()
+            uid = message["text"].strip()
+            if uid:
                 result = send_likes(uid)
                 send_message(chat_id, result)
             else:
-                send_message(chat_id, "⚠ Invalid UID! Please send a valid UID.")
+                send_message(chat_id, "⚠ Invalid UID! Please try again.")
 
-    # Callback Query Handling
+    # Callback button
     if "callback_query" in update:
         callback = update["callback_query"]
         chat_id = callback["message"]["chat"]["id"]
         data = callback["data"]
 
         if data == "send_uid":
-            # Force reply for UID input
-            send_message(chat_id,
-                "✏️ Please enter your UID below:",
+            send_message(
+                chat_id,
+                "✏️ Please enter your Free Fire UID:",
                 force_reply=True
             )
 
