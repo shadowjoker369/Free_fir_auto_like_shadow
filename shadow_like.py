@@ -9,13 +9,8 @@ BOT_TOKEN = "8407881452:AAFm5RKiw54PhIZj7lZ7k-7q7yYSfdN8TLw"
 WEBHOOK_URL = f"https://free-fir-auto-like-shadow.onrender.com/{BOT_TOKEN}"
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 
-# Like APIs
-LIKE_APIS = [
-    "http://103.149.253.241:2010/like?key=conbo&uid={uid}&region=bd",
-    "https://likes.ffgarena.cloud/api/v2/likes?uid={uid}&amount_of_likes=100&auth=trial-7d&region=bd",
-    "http://103.149.253.241:2010/like?key=conbo&uid={uid}&region=sg",
-    "https://like-xp-v12.vercel.app/like?server_name={region}&uid={uid}&key=xp"
-]
+# Like API (single)
+LIKE_API = "https://likes.ffgarena.cloud/api/v2/likes?uid={uid}&amount_of_likes=100&auth=trial-7d&region=bd"
 
 # UID Info APIs
 UID_APIS = [
@@ -42,21 +37,19 @@ def safe_api_call(url: str):
 # -----------------------------
 # Send Likes Function
 # -----------------------------
-def send_likes(uid: str, region: str = "bd") -> str:
-    responses = []
-    for api in LIKE_APIS:
-        url = api.format(uid=uid, region=region)
-        result = safe_api_call(url)
-        if result:
-            responses.append(f"✅ {api.split('/')[2]} → {result}")
-    if not responses:
-        return f"⚠ No Like API responded for UID `{uid}`"
-    return (
-        "🎮 *FREE FIRE AUTO LIKE BOT*\n"
-        "───────────────────────\n"
-        f"🆔 UID: `{uid}`\n\n" + "\n".join(responses) +
-        "\n\n💳 *Credit:* SHADOW JOKER"
-    )
+def send_likes(uid: str) -> str:
+    url = LIKE_API.format(uid=uid)
+    result = safe_api_call(url)
+    if result:
+        response = f"✅ {url.split('/')[2]} → {result}"
+        return (
+            "🎮 *FREE FIRE AUTO LIKE BOT*\n"
+            "───────────────────────\n"
+            f"🆔 UID: `{uid}`\n\n" + response +
+            "\n\n💳 *Credit:* SHADOW JOKER"
+        )
+    else:
+        return f"⚠ Like API did not respond for UID `{uid}`"
 
 # -----------------------------
 # UID Info Function
